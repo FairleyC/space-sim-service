@@ -14,7 +14,7 @@ var (
 type Commodity struct {
 	ID    string
 	Name  string
-	Value float64
+	Price float64
 }
 
 // Store - this interface defines all methods

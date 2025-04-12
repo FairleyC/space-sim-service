@@ -12,14 +12,14 @@ import (
 type CommodityRow struct {
 	ID    string
 	Name  sql.NullString
-	Value sql.NullFloat64
+	Price sql.NullFloat64
 }
 
 func convertCommodityRowToCommodity(row CommodityRow) commodity.Commodity {
 	return commodity.Commodity{
 		ID:    row.ID,
 		Name:  row.Name.String,
-		Value: row.Value.Float64,
+		Price: row.Price.Float64,
 	}
 }
 
@@ -27,12 +27,12 @@ func (d *Database) GetCommodityById(ctx context.Context, id string) (commodity.C
 
 	var commodityRow CommodityRow
 	row := d.Pool.QueryRow(ctx, `
-		SELECT id, name, value
+		SELECT id, name, price
 		FROM commodities
 		WHERE id = $1
 	`, id)
 
-	err := row.Scan(&commodityRow.ID, &commodityRow.Name, &commodityRow.Value)
+	err := row.Scan(&commodityRow.ID, &commodityRow.Name, &commodityRow.Price)
 	if err != nil {
 		return commodity.Commodity{}, fmt.Errorf("error fetching commodity by id: %w", err)
 	}
@@ -50,14 +50,14 @@ func (d *Database) CreateCommodity(ctx context.Context, newCommodity commodity.C
 	newRow := CommodityRow{
 		ID:    newCommodity.ID,
 		Name:  sql.NullString{String: newCommodity.Name, Valid: true},
-		Value: sql.NullFloat64{Float64: newCommodity.Value, Valid: true},
+		Price: sql.NullFloat64{Float64: newCommodity.Price, Valid: true},
 	}
 
 	rows, err := d.Pool.Query(ctx, `
-		INSERT INTO commodities (id, name, value)
+		INSERT INTO commodities (id, name, price)
 		VALUES ($1, $2, $3)
-		RETURNING id, name, value
-	`, newRow.ID, newRow.Name, newRow.Value)
+		RETURNING id, name, price
+	`, newRow.ID, newRow.Name, newRow.Price)
 
 	if err != nil {
 		return commodity.Commodity{}, fmt.Errorf("error creating commodity: %w", err)
@@ -84,12 +84,12 @@ func (d *Database) UpdateCommodityPrice(ctx context.Context, id string, price fl
 	var commodityRow CommodityRow
 	row := d.Pool.QueryRow(ctx, `
 		UPDATE commodities
-		SET value = $1
+		SET price = $1
 		WHERE id = $2
-		RETURNING id, name, value
+		RETURNING id, name, price
 	`, price, id)
 
-	err := row.Scan(&commodityRow.ID, &commodityRow.Name, &commodityRow.Value)
+	err := row.Scan(&commodityRow.ID, &commodityRow.Name, &commodityRow.Price)
 	if err != nil {
 		return commodity.Commodity{}, fmt.Errorf("error updating commodity price: %w", err)
 	}
