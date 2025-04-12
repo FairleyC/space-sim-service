@@ -6,7 +6,7 @@ import (
 
 	"github.com/FairleyC/space-sim-service/internal/commodity"
 	"github.com/FairleyC/space-sim-service/internal/database"
-	transporter "github.com/FairleyC/space-sim-service/internal/transport/http"
+	transport "github.com/FairleyC/space-sim-service/internal/transport/http"
 )
 
 // Run - is going to be responsible for
@@ -28,7 +28,7 @@ func Run() error {
 
 	commodityService := commodity.NewService(db)
 
-	httpHandler := transporter.NewHandler(commodityService)
+	httpHandler := transport.NewHandler(commodityService)
 	if err := httpHandler.Serve(); err != nil {
 		return err
 	}
