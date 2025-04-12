@@ -34,7 +34,7 @@ func (d *Database) GetCommodityById(ctx context.Context, id string) (commodity.C
 
 	err := row.Scan(&commodityRow.ID, &commodityRow.Name, &commodityRow.Price)
 	if err != nil {
-		return commodity.Commodity{}, fmt.Errorf("error fetching commodity by id: %w", err)
+		return commodity.Commodity{}, commodity.ErrCommodityNotFound
 	}
 
 	return convertCommodityRowToCommodity(commodityRow), nil

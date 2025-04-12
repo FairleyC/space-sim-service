@@ -8,6 +8,7 @@ import (
 
 var (
 	ErrFetchingCommodity = errors.New("failed to fetch commodity by id")
+	ErrCommodityNotFound = errors.New("commodity not found")
 	ErrNotImplemented    = errors.New("not implemented")
 )
 
@@ -50,7 +51,7 @@ func NewService(store Store) *Service {
 func (s *Service) GetCommodity(ctx context.Context, id string) (Commodity, error) {
 	commodity, err := s.Store.GetCommodityById(ctx, id)
 	if err != nil {
-		return Commodity{}, ErrFetchingCommodity
+		return Commodity{}, err
 	}
 
 	return commodity, nil

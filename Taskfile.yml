@@ -2,6 +2,10 @@ version: '3'
 
 tasks:
   build:
+    desc: "Build the application"
+    watch: true
+    sources:
+      - '**/*.go'
     cmds:
       - go build -o app cmd/server/main.go
 
@@ -9,14 +13,37 @@ tasks:
     cmds:
       - go test -v ./...
 
-  test:commodity:get:
+  test:commodity:all:
+    desc: GET All Commodities
     cmds:
-      - curl -X GET http://localhost:8080/api/v1/commodities
+      - curl -i -X GET http://localhost:8080/api/v1/commodities
 
-  test:commodity:post:
+  test:commodity:get:
+    desc: GET Commodity, requires UUID
     cmds:
     - |
-      curl -X POST http://localhost:8080/api/v1/commodities -H "Content-Type: application/json" -d '{"name": "test", "price": 100}'
+      set -- {{.CLI_ARGS}}
+      curl -i -X GET http://localhost:8080/api/v1/commodities/${1}
+
+  test:commodity:post:
+    desc: POST a test Commodity
+    cmds:
+    - |
+      curl -i -X POST http://localhost:8080/api/v1/commodities -H "Content-Type: application/json" -d '{"name": "test", "price": 100}'
+
+  test:commodity:put:
+    desc: PUT Commodity Price, requires UUID and Price
+    cmds:
+    - |
+      set -- {{.CLI_ARGS}}
+      curl -i -X PUT http://localhost:8080/api/v1/commodities/${1} -H "Content-Type: application/json" -d "{\"price\": ${2}}"
+
+  test:commodity:delete:
+    desc: DELETE Commodity, requires UUID
+    cmds:
+    - |
+      set -- {{.CLI_ARGS}}
+      curl -i -X DELETE http://localhost:8080/api/v1/commodities/${1}
 
   lint:
     cmds:
