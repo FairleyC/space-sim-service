@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"github.com/FairleyC/space-sim-service/internal/commodity"
 	"github.com/FairleyC/space-sim-service/internal/database"
+	transporter "github.com/FairleyC/space-sim-service/internal/transport/http"
 )
 
 // Run - is going to be responsible for
@@ -28,31 +28,9 @@ func Run() error {
 
 	commodityService := commodity.NewService(db)
 
-	c, err := commodityService.CreateCommodity(context.Background(), commodity.Commodity{
-		Name:  "Water",
-		Value: 100,
-	})
-
-	d, err := commodityService.GetCommodity(context.Background(), c.ID)
-
-	fmt.Println(d)
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /commodities", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "return all defined commodities\n")
-	})
-
-	mux.HandleFunc("GET /commodities/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id := r.PathValue("id")
-		fmt.Fprintf(w, "return a single comment with the commodity id: %s\n", id)
-	})
-
-	mux.HandleFunc("POST /commodities", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "create a new commodity\n")
-	})
-
-	if err := http.ListenAndServe(":8080", mux); err != nil {
-		fmt.Println(err.Error())
+	httpHandler := transporter.NewHandler(commodityService)
+	if err := httpHandler.Serve(); err != nil {
+		return err
 	}
 
 	return nil

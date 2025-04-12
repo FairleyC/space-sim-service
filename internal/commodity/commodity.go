@@ -26,6 +26,14 @@ type Store interface {
 	UpdateCommodityPrice(context.Context, string, float64) (Commodity, error)
 }
 
+type CommodityService interface {
+	GetAllCommodity(ctx context.Context) ([]Commodity, error)
+	GetCommodity(ctx context.Context, id string) (Commodity, error)
+	CreateCommodity(ctx context.Context, commodity Commodity) (Commodity, error)
+	UpdateCommodityPrice(ctx context.Context, id string, price float64) (Commodity, error)
+	RemoveCommodity(ctx context.Context, id string) error
+}
+
 // Service - is the struct on which all our
 // logic will be built on top of
 type Service struct {
