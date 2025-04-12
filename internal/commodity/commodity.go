@@ -8,12 +8,12 @@ import (
 
 var (
 	ErrFetchingCommodity = errors.New("failed to fetch commodity by id")
-	ErrNotImplemented = errors.New("not implemented")
+	ErrNotImplemented    = errors.New("not implemented")
 )
 
 type Commodity struct {
-	ID string
-	Name string
+	ID    string
+	Name  string
 	Value float64
 }
 
@@ -21,6 +21,9 @@ type Commodity struct {
 // our service needs to operate.
 type Store interface {
 	GetCommodityById(context.Context, string) (Commodity, error)
+	CreateCommodity(context.Context, Commodity) (Commodity, error)
+	RemoveCommodity(context.Context, string) error
+	UpdateCommodityPrice(context.Context, string, float64) (Commodity, error)
 }
 
 // Service - is the struct on which all our
@@ -37,30 +40,42 @@ func NewService(store Store) *Service {
 }
 
 func (s *Service) GetCommodity(ctx context.Context, id string) (Commodity, error) {
-	fmt.Println("retrieve commodity with id: ", id)
-
-	cmt, err := s.Store.GetCommodityById(ctx, id)
+	commodity, err := s.Store.GetCommodityById(ctx, id)
 	if err != nil {
-		// Print the error for logging and return sanitized error to user.
-		fmt.Println(err)
 		return Commodity{}, ErrFetchingCommodity
 	}
 
-	return cmt, nil
+	return commodity, nil
 }
 
 func (s *Service) GetAllCommodity(ctx context.Context) ([]Commodity, error) {
+	// TODO: Want to implement this with pagination.
 	return nil, ErrNotImplemented
 }
 
 func (s *Service) UpdateCommodityPrice(ctx context.Context, id string, price float64) (Commodity, error) {
-	return Commodity{}, ErrNotImplemented
+	updatedCommodity, err := s.Store.UpdateCommodityPrice(ctx, id, price)
+	if err != nil {
+		return Commodity{}, fmt.Errorf("error updating commodity price: %w", err)
+	}
+
+	return updatedCommodity, nil
 }
 
 func (s *Service) CreateCommodity(ctx context.Context, commodity Commodity) (Commodity, error) {
-	return Commodity{}, ErrNotImplemented
+	createdCommodity, err := s.Store.CreateCommodity(ctx, commodity)
+	if err != nil {
+		return Commodity{}, fmt.Errorf("error creating commodity: %w", err)
+	}
+
+	return createdCommodity, nil
 }
 
-func (s *Service) DeleteCommodity(ctx context.Context, id string) error {
-	return ErrNotImplemented
+func (s *Service) RemoveCommodity(ctx context.Context, id string) error {
+	err := s.Store.RemoveCommodity(ctx, id)
+	if err != nil {
+		return fmt.Errorf("error removing commodity: %w", err)
+	}
+
+	return nil
 }

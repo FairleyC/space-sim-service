@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -31,7 +32,10 @@ func (d *Database) Migrate() error {
 	}
 
 	if err := m.Up(); err != nil {
-		return fmt.Errorf("could not run up migrations: %w", err)
+		if !errors.Is(err, migrate.ErrNoChange) {
+			return fmt.Errorf("could not run up migrations: %w", err)
+		}
+		fmt.Println("No new migrations to run")
 	}
 
 	fmt.Println("Database migrated successfully")

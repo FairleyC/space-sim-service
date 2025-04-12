@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/FairleyC/space-sim-service/internal/commodity"
 	"github.com/FairleyC/space-sim-service/internal/database"
 )
 
@@ -25,17 +26,28 @@ func Run() error {
 		return err
 	}
 
+	commodityService := commodity.NewService(db)
+
+	c, err := commodityService.CreateCommodity(context.Background(), commodity.Commodity{
+		Name:  "Water",
+		Value: 100,
+	})
+
+	d, err := commodityService.GetCommodity(context.Background(), c.ID)
+
+	fmt.Println(d)
+
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /commodity", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /commodities", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "return all defined commodities\n")
 	})
 
-	mux.HandleFunc("GET /commodity/{id}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /commodities/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("id")
 		fmt.Fprintf(w, "return a single comment with the commodity id: %s\n", id)
 	})
 
-	mux.HandleFunc("POST /commodity", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("POST /commodities", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "create a new commodity\n")
 	})
 
