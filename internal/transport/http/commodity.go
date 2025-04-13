@@ -8,19 +8,31 @@ import (
 	"net/http"
 
 	"github.com/FairleyC/space-sim-service/internal/commodity"
+	"github.com/FairleyC/space-sim-service/internal/data"
 	"github.com/gorilla/mux"
 )
 
+type CommodityResponse struct {
+	Commodities []commodity.Commodity `json:"commodities"`
+	Pagination  data.Pagination       `json:"pagination"`
+}
+
 func (h *Handler) GetCommodities(w http.ResponseWriter, r *http.Request) {
 	log.Println("REQUEST: GetCommodities")
-	commodities, err := h.Service.GetAllCommodity(r.Context())
+
+	pagination := data.GetPagination(r)
+
+	commodities, err := h.Service.GetAllCommodity(r.Context(), pagination)
 	if err != nil {
 		log.Println("Error getting commodities", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(commodities); err != nil {
+	if err := json.NewEncoder(w).Encode(CommodityResponse{
+		Commodities: commodities,
+		Pagination:  pagination,
+	}); err != nil {
 		log.Println("Error encoding commodities", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return

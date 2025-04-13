@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/FairleyC/space-sim-service/internal/commodity"
+	"github.com/FairleyC/space-sim-service/internal/data"
 	"github.com/google/uuid"
 )
 
@@ -38,6 +39,43 @@ func (d *Database) GetCommodityById(ctx context.Context, id string) (commodity.C
 	}
 
 	return convertCommodityRowToCommodity(commodityRow), nil
+}
+
+func (d *Database) GetCommoditiesByPagination(ctx context.Context, pagination data.Pagination) ([]commodity.Commodity, error) {
+	offset := pagination.GetOffset()
+	limit := pagination.GetLimit()
+	orderBy := pagination.GetOrderBy()
+
+	rows, err := d.Pool.Query(ctx, `
+		SELECT id, name, price
+		FROM commodities
+		ORDER BY $1
+		LIMIT $2
+		OFFSET $3
+	`, orderBy, limit, offset)
+
+	if err != nil {
+		return nil, fmt.Errorf("error getting commodities by pagination: %w", err)
+	}
+
+	defer rows.Close()
+
+	commodities := []commodity.Commodity{}
+	for rows.Next() {
+		var commodityRow CommodityRow
+		err := rows.Scan(&commodityRow.ID, &commodityRow.Name, &commodityRow.Price)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning commodity row: %w", err)
+		}
+
+		commodities = append(commodities, convertCommodityRowToCommodity(commodityRow))
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over rows: %w", err)
+	}
+
+	return commodities, nil
 }
 
 func (d *Database) CreateCommodity(ctx context.Context, newCommodity commodity.Commodity) (commodity.Commodity, error) {
