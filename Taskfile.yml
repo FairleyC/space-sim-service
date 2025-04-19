@@ -15,11 +15,11 @@ tasks:
       - go test -v ./...
 
   test:commodity:all:
-    desc: GET All Commodities, {page} {per_page} {order_by}
+    desc: GET All Commodities, {page} {per_page} {order_by} {direction}
     cmds:
     - |
       set -- {{.CLI_ARGS}}
-      curl -i -X GET "http://localhost:8080/api/v1/commodities?page=${1}&per_page=${2}&order_by=${3}"
+      curl -i -X GET "http://localhost:8080/api/v1/commodities?page=${1}&per_page=${2}&order_by=${3},${4}"
 
   test:commodity:get:
     desc: GET Commodity, {id}

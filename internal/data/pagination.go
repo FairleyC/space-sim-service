@@ -55,10 +55,29 @@ func (p *Pagination) GetLimit() int {
 	return p.PerPage
 }
 
-func (p *Pagination) GetOrderBy(allowedOrderBy []string, defaultOrderBy string) string {
-	if !slices.Contains(allowedOrderBy, strings.ToLower(p.OrderBy)) {
+func (p *Pagination) GetOrderByField(allowedOrderBy []string, defaultOrderBy string) string {
+	parsedOrderBy := p.OrderBy
+
+	if strings.Contains(parsedOrderBy, ",") {
+		parsedOrderBy = strings.Split(parsedOrderBy, ",")[0]
+	}
+
+	if !slices.Contains(allowedOrderBy, strings.ToLower(parsedOrderBy)) {
 		return defaultOrderBy
 	}
 
-	return strings.ToLower(p.OrderBy)
+	return strings.ToLower(parsedOrderBy)
+}
+
+func (p *Pagination) GetOrderByDirection() string {
+	if strings.Contains(p.OrderBy, ",") {
+		orderBy := strings.Split(p.OrderBy, ",")
+		if len(orderBy) > 1 {
+			if orderBy[1] == "desc" {
+				return "desc"
+			}
+		}
+	}
+
+	return "asc"
 }
