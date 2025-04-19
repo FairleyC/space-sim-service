@@ -21,7 +21,7 @@ func (h *Handler) GetCommodities(w http.ResponseWriter, r *http.Request) {
 
 	pagination := data.GetPagination(r)
 
-	commodities, err := h.CommodityService.GetAllCommodity(r.Context(), pagination)
+	commodities, err := h.CommodityService.FindAllCommodity(r.Context(), pagination)
 	if err != nil {
 		log.Println("Error getting commodities", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -49,7 +49,7 @@ func (h *Handler) GetCommodity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	foundCommodity, err := h.CommodityService.GetCommodity(r.Context(), id)
+	foundCommodity, err := h.CommodityService.FindCommodity(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, commodity.ErrCommodityNotFound) {
 			log.Println("Commodity not found", err)

@@ -21,7 +21,7 @@ func (h *Handler) GetSolarSystems(w http.ResponseWriter, r *http.Request) {
 
 	pagination := data.GetPagination(r)
 
-	solarSystems, err := h.SolarSystemService.GetAllSolarSystems(r.Context(), pagination)
+	solarSystems, err := h.SolarSystemService.FindAllSolarSystems(r.Context(), pagination)
 	if err != nil {
 		log.Println("Error getting solar systems", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -49,7 +49,7 @@ func (h *Handler) GetSolarSystem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	foundSolarSystem, err := h.SolarSystemService.GetSolarSystem(r.Context(), id)
+	foundSolarSystem, err := h.SolarSystemService.FindSolarSystem(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, solarSystem.ErrSolarSystemNotFound) {
 			log.Println("Solar system not found", err)

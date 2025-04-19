@@ -25,13 +25,6 @@ type Store interface {
 	RemoveSolarSystem(context.Context, string) error
 }
 
-type SolarSystemService interface {
-	GetAllSolarSystems(ctx context.Context, pagination data.Pagination) ([]SolarSystem, error)
-	GetSolarSystem(ctx context.Context, id string) (SolarSystem, error)
-	CreateSolarSystem(ctx context.Context, solarSystem SolarSystem) (SolarSystem, error)
-	RemoveSolarSystem(ctx context.Context, id string) error
-}
-
 type Service struct {
 	Store Store
 }
@@ -40,7 +33,7 @@ func NewService(store Store) *Service {
 	return &Service{Store: store}
 }
 
-func (s *Service) GetSolarSystem(ctx context.Context, id string) (SolarSystem, error) {
+func (s *Service) FindSolarSystem(ctx context.Context, id string) (SolarSystem, error) {
 	solarSystem, err := s.Store.GetSolarSystemById(ctx, id)
 	if err != nil {
 		return SolarSystem{}, err
@@ -49,7 +42,7 @@ func (s *Service) GetSolarSystem(ctx context.Context, id string) (SolarSystem, e
 	return solarSystem, nil
 }
 
-func (s *Service) GetAllSolarSystems(ctx context.Context, pagination data.Pagination) ([]SolarSystem, error) {
+func (s *Service) FindAllSolarSystems(ctx context.Context, pagination data.Pagination) ([]SolarSystem, error) {
 	solarSystems, err := s.Store.GetSolarSystemsByPagination(ctx, pagination)
 	if err != nil {
 		return nil, err

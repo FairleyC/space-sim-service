@@ -10,18 +10,33 @@ import (
 	"time"
 
 	"github.com/FairleyC/space-sim-service/internal/commodity"
+	"github.com/FairleyC/space-sim-service/internal/data"
 	"github.com/FairleyC/space-sim-service/internal/solarSystem"
 	"github.com/gorilla/mux"
 )
 
+type HttpExposedSolarSystemService interface {
+	FindAllSolarSystems(ctx context.Context, pagination data.Pagination) ([]solarSystem.SolarSystem, error)
+	FindSolarSystem(ctx context.Context, id string) (solarSystem.SolarSystem, error)
+	CreateSolarSystem(ctx context.Context, solarSystem solarSystem.SolarSystem) (solarSystem.SolarSystem, error)
+	RemoveSolarSystem(ctx context.Context, id string) error
+}
+
+type HttpExposedCommodityService interface {
+	FindAllCommodity(ctx context.Context, pagination data.Pagination) ([]commodity.Commodity, error)
+	FindCommodity(ctx context.Context, id string) (commodity.Commodity, error)
+	CreateCommodity(ctx context.Context, commodity commodity.Commodity) (commodity.Commodity, error)
+	RemoveCommodity(ctx context.Context, id string) error
+}
+
 type Handler struct {
 	Router             *mux.Router
-	CommodityService   commodity.CommodityService
-	SolarSystemService solarSystem.SolarSystemService
+	CommodityService   HttpExposedCommodityService
+	SolarSystemService HttpExposedSolarSystemService
 	Server             *http.Server
 }
 
-func NewHandler(commodityService commodity.CommodityService, solarSystemService solarSystem.SolarSystemService) *Handler {
+func NewHandler(commodityService HttpExposedCommodityService, solarSystemService HttpExposedSolarSystemService) *Handler {
 	h := &Handler{
 		CommodityService:   commodityService,
 		SolarSystemService: solarSystemService,

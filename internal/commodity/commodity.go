@@ -30,13 +30,6 @@ type Store interface {
 	RemoveCommodity(context.Context, string) error
 }
 
-type CommodityService interface {
-	GetAllCommodity(ctx context.Context, pagination data.Pagination) ([]Commodity, error)
-	GetCommodity(ctx context.Context, id string) (Commodity, error)
-	CreateCommodity(ctx context.Context, commodity Commodity) (Commodity, error)
-	RemoveCommodity(ctx context.Context, id string) error
-}
-
 // Service - is the struct on which all our
 // logic will be built on top of
 type Service struct {
@@ -50,7 +43,7 @@ func NewService(store Store) *Service {
 	}
 }
 
-func (s *Service) GetCommodity(ctx context.Context, id string) (Commodity, error) {
+func (s *Service) FindCommodity(ctx context.Context, id string) (Commodity, error) {
 	commodity, err := s.Store.GetCommodityById(ctx, id)
 	if err != nil {
 		return Commodity{}, err
@@ -59,7 +52,7 @@ func (s *Service) GetCommodity(ctx context.Context, id string) (Commodity, error
 	return commodity, nil
 }
 
-func (s *Service) GetAllCommodity(ctx context.Context, pagination data.Pagination) ([]Commodity, error) {
+func (s *Service) FindAllCommodity(ctx context.Context, pagination data.Pagination) ([]Commodity, error) {
 	commodities, err := s.Store.GetCommoditiesByPagination(ctx, pagination)
 	if err != nil {
 		return nil, fmt.Errorf("error getting commodities by pagination: %w", err)

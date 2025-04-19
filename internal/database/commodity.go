@@ -30,7 +30,7 @@ func (d *Database) GetCommodityById(ctx context.Context, id string) (commodity.C
 
 	var commodityRow CommodityRow
 	row := d.Pool.QueryRow(ctx, `
-		SELECT id, name, price
+		SELECT id, name, unitmass, unitvolume
 		FROM commodities
 		WHERE id = $1
 	`, id)
