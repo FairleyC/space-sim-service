@@ -9,9 +9,9 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/FairleyC/space-sim-service/internal/commodity"
 	"github.com/FairleyC/space-sim-service/internal/data"
-	"github.com/FairleyC/space-sim-service/internal/solarSystem"
+	"github.com/FairleyC/space-sim-service/internal/services/commodity"
+	"github.com/FairleyC/space-sim-service/internal/services/solarSystem"
 	"github.com/gorilla/mux"
 )
 

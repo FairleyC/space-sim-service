@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/FairleyC/space-sim-service/internal/data"
-	"github.com/FairleyC/space-sim-service/internal/solarSystem"
+	"github.com/FairleyC/space-sim-service/internal/services/solarSystem"
 	"github.com/gorilla/mux"
 )
 

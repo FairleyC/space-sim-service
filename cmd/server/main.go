@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/FairleyC/space-sim-service/internal/commodity"
 	"github.com/FairleyC/space-sim-service/internal/database"
-	"github.com/FairleyC/space-sim-service/internal/solarSystem"
+	"github.com/FairleyC/space-sim-service/internal/services/commodity"
+	"github.com/FairleyC/space-sim-service/internal/services/solarSystem"
 	transport "github.com/FairleyC/space-sim-service/internal/transport/http"
 )
 

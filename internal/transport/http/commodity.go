@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/FairleyC/space-sim-service/internal/commodity"
 	"github.com/FairleyC/space-sim-service/internal/data"
+	"github.com/FairleyC/space-sim-service/internal/services/commodity"
 	"github.com/gorilla/mux"
 )
 
