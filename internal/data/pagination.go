@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"slices"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -55,9 +56,9 @@ func (p *Pagination) GetLimit() int {
 }
 
 func (p *Pagination) GetOrderBy(allowedOrderBy []string, defaultOrderBy string) string {
-	if !slices.Contains(allowedOrderBy, p.OrderBy) {
+	if !slices.Contains(allowedOrderBy, strings.ToLower(p.OrderBy)) {
 		return defaultOrderBy
 	}
 
-	return p.OrderBy
+	return strings.ToLower(p.OrderBy)
 }
