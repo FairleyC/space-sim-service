@@ -15,9 +15,10 @@ var (
 )
 
 type Commodity struct {
-	ID    string
-	Name  string
-	Price float64
+	ID         string
+	Name       string
+	UnitMass   float64
+	UnitVolume float64
 }
 
 // Store - this interface defines all methods
@@ -27,14 +28,12 @@ type Store interface {
 	GetCommoditiesByPagination(context.Context, data.Pagination) ([]Commodity, error)
 	CreateCommodity(context.Context, Commodity) (Commodity, error)
 	RemoveCommodity(context.Context, string) error
-	UpdateCommodityPrice(context.Context, string, float64) (Commodity, error)
 }
 
 type CommodityService interface {
 	GetAllCommodity(ctx context.Context, pagination data.Pagination) ([]Commodity, error)
 	GetCommodity(ctx context.Context, id string) (Commodity, error)
 	CreateCommodity(ctx context.Context, commodity Commodity) (Commodity, error)
-	UpdateCommodityPrice(ctx context.Context, id string, price float64) (Commodity, error)
 	RemoveCommodity(ctx context.Context, id string) error
 }
 
@@ -67,15 +66,6 @@ func (s *Service) GetAllCommodity(ctx context.Context, pagination data.Paginatio
 	}
 
 	return commodities, nil
-}
-
-func (s *Service) UpdateCommodityPrice(ctx context.Context, id string, price float64) (Commodity, error) {
-	updatedCommodity, err := s.Store.UpdateCommodityPrice(ctx, id, price)
-	if err != nil {
-		return Commodity{}, fmt.Errorf("error updating commodity price: %w", err)
-	}
-
-	return updatedCommodity, nil
 }
 
 func (s *Service) CreateCommodity(ctx context.Context, commodity Commodity) (Commodity, error) {

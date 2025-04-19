@@ -10,6 +10,7 @@ tasks:
       - go build -o app cmd/server/main.go
 
   test:
+    desc: Run the tests
     cmds:
       - go test -v ./...
 
@@ -28,18 +29,11 @@ tasks:
       curl -i -X GET http://localhost:8080/api/v1/commodities/${1}
  
   test:commodity:post:
-    desc: POST a test Commodity, {name} {price}
+    desc: POST a test Commodity, {name} {unitmass} {unitvolume}
     cmds:
     - |
       set -- {{.CLI_ARGS}}
-      curl -i -X POST http://localhost:8080/api/v1/commodities -H "Content-Type: application/json" -d "{\"name\": \"${1}\", \"price\": ${2}}"
-
-  test:commodity:put:
-    desc: PUT Commodity Price, {id} {price}
-    cmds:
-    - |
-      set -- {{.CLI_ARGS}}
-      curl -i -X PUT http://localhost:8080/api/v1/commodities/${1} -H "Content-Type: application/json" -d "{\"price\": ${2}}"
+      curl -i -X POST http://localhost:8080/api/v1/commodities -H "Content-Type: application/json" -d "{\"name\": \"${1}\", \"unitmass\": ${2}, \"unitvolume\": ${3}}"
 
   test:commodity:delete:
     desc: DELETE Commodity, {id}
@@ -49,13 +43,16 @@ tasks:
       curl -i -X DELETE http://localhost:8080/api/v1/commodities/${1}
 
   lint:
+    desc: Run the linter
     cmds:
       - golangci-lint run
 
   run:
+    desc: Build and run the application
     cmds:
       - docker-compose up --build
 
   clear:
+    desc: Clear the database, delete all containers and volumes
     cmds:
       - docker-compose down -v

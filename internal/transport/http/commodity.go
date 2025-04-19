@@ -3,7 +3,6 @@ package http
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -70,9 +69,10 @@ func (h *Handler) GetCommodity(w http.ResponseWriter, r *http.Request) {
 }
 
 type CommodityJson struct {
-	ID    string
-	Name  string
-	Price float64
+	ID         string
+	Name       string
+	UnitMass   float64
+	UnitVolume float64
 }
 
 func (h *Handler) PostCommodity(w http.ResponseWriter, r *http.Request) {
@@ -85,61 +85,16 @@ func (h *Handler) PostCommodity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	commodity := commodity.Commodity{
-		ID:    commodityJson.ID,
-		Name:  commodityJson.Name,
-		Price: commodityJson.Price,
+		ID:         commodityJson.ID,
+		Name:       commodityJson.Name,
+		UnitMass:   commodityJson.UnitMass,
+		UnitVolume: commodityJson.UnitVolume,
 	}
 
 	commodity, err := h.Service.CreateCommodity(r.Context(), commodity)
 
 	if err != nil {
 		log.Println("Error creating commodity", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	if err := json.NewEncoder(w).Encode(commodity); err != nil {
-		log.Println("Error encoding commodity", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
-type CommodityPriceUpdateJson struct {
-	Price *float64
-}
-
-func (h *Handler) PutCommodityPrice(w http.ResponseWriter, r *http.Request) {
-	log.Println("REQUEST: PutCommodityPrice")
-	vars := mux.Vars(r)
-	id := vars["id"]
-
-	if id == "" {
-		log.Println("ID was missing from request")
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	var priceUpdateJson CommodityPriceUpdateJson
-	if err := json.NewDecoder(r.Body).Decode(&priceUpdateJson); err != nil {
-		log.Println("Error decoding commodity price update", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	if priceUpdateJson.Price == nil {
-		err := errors.New("price was missing from request")
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("%v\n", err)))
-		return
-	}
-
-	price := *priceUpdateJson.Price
-
-	commodity, err := h.Service.UpdateCommodityPrice(r.Context(), id, price)
-	if err != nil {
-		log.Println("Error updating commodity price", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

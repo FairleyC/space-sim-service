@@ -11,16 +11,18 @@ import (
 )
 
 type CommodityRow struct {
-	ID    string
-	Name  sql.NullString
-	Price sql.NullFloat64
+	ID         string
+	Name       sql.NullString
+	UnitMass   sql.NullFloat64
+	UnitVolume sql.NullFloat64
 }
 
 func convertCommodityRowToCommodity(row CommodityRow) commodity.Commodity {
 	return commodity.Commodity{
-		ID:    row.ID,
-		Name:  row.Name.String,
-		Price: row.Price.Float64,
+		ID:         row.ID,
+		Name:       row.Name.String,
+		UnitMass:   row.UnitMass.Float64,
+		UnitVolume: row.UnitVolume.Float64,
 	}
 }
 
@@ -33,7 +35,7 @@ func (d *Database) GetCommodityById(ctx context.Context, id string) (commodity.C
 		WHERE id = $1
 	`, id)
 
-	err := row.Scan(&commodityRow.ID, &commodityRow.Name, &commodityRow.Price)
+	err := row.Scan(&commodityRow.ID, &commodityRow.Name, &commodityRow.UnitMass, &commodityRow.UnitVolume)
 	if err != nil {
 		return commodity.Commodity{}, commodity.ErrCommodityNotFound
 	}
@@ -44,10 +46,10 @@ func (d *Database) GetCommodityById(ctx context.Context, id string) (commodity.C
 func (d *Database) GetCommoditiesByPagination(ctx context.Context, pagination data.Pagination) ([]commodity.Commodity, error) {
 	offset := pagination.GetOffset()
 	limit := pagination.GetLimit()
-	orderBy := pagination.GetOrderBy([]string{"price", "name"}, "createdat")
+	orderBy := pagination.GetOrderBy([]string{"unitmass", "unitvolume", "name"}, "createdat")
 
 	rows, err := d.Pool.Query(ctx, `
-		SELECT id, name, price
+		SELECT id, name, unitmass, unitvolume
 		FROM commodities
 		ORDER BY `+orderBy+`
 		LIMIT $1
@@ -63,7 +65,7 @@ func (d *Database) GetCommoditiesByPagination(ctx context.Context, pagination da
 	commodities := []commodity.Commodity{}
 	for rows.Next() {
 		var commodityRow CommodityRow
-		err := rows.Scan(&commodityRow.ID, &commodityRow.Name, &commodityRow.Price)
+		err := rows.Scan(&commodityRow.ID, &commodityRow.Name, &commodityRow.UnitMass, &commodityRow.UnitVolume)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning commodity row: %w", err)
 		}
@@ -86,16 +88,17 @@ func (d *Database) CreateCommodity(ctx context.Context, newCommodity commodity.C
 
 	newCommodity.ID = newUuid.String()
 	newRow := CommodityRow{
-		ID:    newCommodity.ID,
-		Name:  sql.NullString{String: newCommodity.Name, Valid: true},
-		Price: sql.NullFloat64{Float64: newCommodity.Price, Valid: true},
+		ID:         newCommodity.ID,
+		Name:       sql.NullString{String: newCommodity.Name, Valid: true},
+		UnitMass:   sql.NullFloat64{Float64: newCommodity.UnitMass, Valid: true},
+		UnitVolume: sql.NullFloat64{Float64: newCommodity.UnitVolume, Valid: true},
 	}
 
 	rows, err := d.Pool.Query(ctx, `
-		INSERT INTO commodities (id, name, price)
-		VALUES ($1, $2, $3)
-		RETURNING id, name, price
-	`, newRow.ID, newRow.Name, newRow.Price)
+		INSERT INTO commodities (id, name, unitmass, unitvolume)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, name, unitmass, unitvolume
+	`, newRow.ID, newRow.Name, newRow.UnitMass, newRow.UnitVolume)
 
 	if err != nil {
 		return commodity.Commodity{}, fmt.Errorf("error creating commodity: %w", err)
@@ -116,21 +119,4 @@ func (d *Database) RemoveCommodity(ctx context.Context, id string) error {
 	}
 
 	return nil
-}
-
-func (d *Database) UpdateCommodityPrice(ctx context.Context, id string, price float64) (commodity.Commodity, error) {
-	var commodityRow CommodityRow
-	row := d.Pool.QueryRow(ctx, `
-		UPDATE commodities
-		SET price = $1
-		WHERE id = $2
-		RETURNING id, name, price
-	`, price, id)
-
-	err := row.Scan(&commodityRow.ID, &commodityRow.Name, &commodityRow.Price)
-	if err != nil {
-		return commodity.Commodity{}, fmt.Errorf("error updating commodity price: %w", err)
-	}
-
-	return convertCommodityRowToCommodity(commodityRow), nil
 }

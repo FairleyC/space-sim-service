@@ -45,7 +45,6 @@ func (h *Handler) mapRoutes() {
 	h.Router.HandleFunc(withPath(V1, "/commodities"), h.GetCommodities).Methods("GET")
 	h.Router.HandleFunc(withPath(V1, "/commodities/{id}"), h.GetCommodity).Methods("GET")
 	h.Router.HandleFunc(withPath(V1, "/commodities"), h.PostCommodity).Methods("POST")
-	h.Router.HandleFunc(withPath(V1, "/commodities/{id}"), h.PutCommodityPrice).Methods("PUT")
 	h.Router.HandleFunc(withPath(V1, "/commodities/{id}"), h.DeleteCommodity).Methods("DELETE")
 }
 
