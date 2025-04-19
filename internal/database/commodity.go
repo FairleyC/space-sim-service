@@ -44,15 +44,15 @@ func (d *Database) GetCommodityById(ctx context.Context, id string) (commodity.C
 func (d *Database) GetCommoditiesByPagination(ctx context.Context, pagination data.Pagination) ([]commodity.Commodity, error) {
 	offset := pagination.GetOffset()
 	limit := pagination.GetLimit()
-	orderBy := pagination.GetOrderBy()
+	orderBy := pagination.GetOrderBy([]string{"price", "name"}, "createdat")
 
 	rows, err := d.Pool.Query(ctx, `
 		SELECT id, name, price
 		FROM commodities
-		ORDER BY $1
-		LIMIT $2
-		OFFSET $3
-	`, orderBy, limit, offset)
+		ORDER BY `+orderBy+`
+		LIMIT $1
+		OFFSET $2
+	`, limit, offset)
 
 	if err != nil {
 		return nil, fmt.Errorf("error getting commodities by pagination: %w", err)

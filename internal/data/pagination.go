@@ -2,6 +2,7 @@ package data
 
 import (
 	"net/http"
+	"slices"
 	"strconv"
 )
 
@@ -53,9 +54,10 @@ func (p *Pagination) GetLimit() int {
 	return p.PerPage
 }
 
-func (p *Pagination) GetOrderBy() string {
-	if p.OrderBy == "" {
-		return "createdat"
+func (p *Pagination) GetOrderBy(allowedOrderBy []string, defaultOrderBy string) string {
+	if !slices.Contains(allowedOrderBy, p.OrderBy) {
+		return defaultOrderBy
 	}
+
 	return p.OrderBy
 }
