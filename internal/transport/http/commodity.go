@@ -21,7 +21,7 @@ func (h *Handler) GetCommodities(w http.ResponseWriter, r *http.Request) {
 
 	pagination := data.GetPagination(r)
 
-	commodities, err := h.Service.GetAllCommodity(r.Context(), pagination)
+	commodities, err := h.CommodityService.GetAllCommodity(r.Context(), pagination)
 	if err != nil {
 		log.Println("Error getting commodities", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -49,7 +49,7 @@ func (h *Handler) GetCommodity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	foundCommodity, err := h.Service.GetCommodity(r.Context(), id)
+	foundCommodity, err := h.CommodityService.GetCommodity(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, commodity.ErrCommodityNotFound) {
 			log.Println("Commodity not found", err)
@@ -91,7 +91,7 @@ func (h *Handler) PostCommodity(w http.ResponseWriter, r *http.Request) {
 		UnitVolume: commodityJson.UnitVolume,
 	}
 
-	commodity, err := h.Service.CreateCommodity(r.Context(), commodity)
+	commodity, err := h.CommodityService.CreateCommodity(r.Context(), commodity)
 
 	if err != nil {
 		log.Println("Error creating commodity", err)
@@ -116,7 +116,7 @@ func (h *Handler) DeleteCommodity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.Service.RemoveCommodity(r.Context(), id)
+	err := h.CommodityService.RemoveCommodity(r.Context(), id)
 	if err != nil {
 		log.Println("Error deleting commodity", err)
 		w.WriteHeader(http.StatusInternalServerError)
