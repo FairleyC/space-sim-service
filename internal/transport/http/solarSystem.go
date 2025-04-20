@@ -121,3 +121,104 @@ func (h *Handler) DeleteSolarSystem(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+type CommodityMarketJson struct {
+	BasePrice      float64
+	DemandQuantity int
+	CommodityID    string
+}
+
+func (h *Handler) PostCommodityMarket(w http.ResponseWriter, r *http.Request) {
+	log.Println("REQUEST: PostCommodityMarket")
+	vars := mux.Vars(r)
+
+	solarSystemId := vars["solarSystemId"]
+	if solarSystemId == "" {
+		log.Println("Solar system ID was missing from request")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var commodityMarketJson CommodityMarketJson
+	if err := json.NewDecoder(r.Body).Decode(&commodityMarketJson); err != nil {
+		log.Println("Error decoding commodity market", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	commodityMarket, err := h.SolarSystemService.CreateCommodityMarket(r.Context(), solarSystemId, commodityMarketJson.BasePrice, commodityMarketJson.DemandQuantity, commodityMarketJson.CommodityID)
+	if err != nil {
+		log.Println("Error creating commodity market", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(commodityMarket); err != nil {
+		log.Println("Error encoding commodity market", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+type CommodityMarketUpdateJson struct {
+	BasePrice      float64
+	DemandQuantity int
+}
+
+func (h *Handler) PutCommodityMarket(w http.ResponseWriter, r *http.Request) {
+	log.Println("REQUEST: PutCommodityMarket")
+	vars := mux.Vars(r)
+	solarSystemId := vars["solarSystemId"]
+	commodityMarketId := vars["commodityMarketId"]
+
+	if solarSystemId == "" || commodityMarketId == "" {
+		log.Println("ID was missing from request")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	commodityMarketUpdateJson := CommodityMarketUpdateJson{}
+	if err := json.NewDecoder(r.Body).Decode(&commodityMarketUpdateJson); err != nil {
+		log.Println("Error decoding commodity market update", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	commodityMarketUpdate := solarSystem.CommodityMarketUpdate{
+		BasePrice:      commodityMarketUpdateJson.BasePrice,
+		DemandQuantity: commodityMarketUpdateJson.DemandQuantity,
+	}
+
+	commodityMarket, err := h.SolarSystemService.UpdateCommodityMarket(r.Context(), commodityMarketId, commodityMarketUpdate)
+	if err != nil {
+		log.Println("Error updating commodity market", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(commodityMarket); err != nil {
+		log.Println("Error encoding commodity market", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *Handler) DeleteCommodityMarket(w http.ResponseWriter, r *http.Request) {
+	log.Println("REQUEST: DeleteCommodityMarket")
+	vars := mux.Vars(r)
+	solarSystemId := vars["solarSystemId"]
+	commodityMarketId := vars["commodityMarketId"]
+
+	if solarSystemId == "" || commodityMarketId == "" {
+		log.Println("ID was missing from request")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := h.SolarSystemService.RemoveCommodityMarket(r.Context(), commodityMarketId)
+	if err != nil {
+		log.Println("Error deleting commodity market", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}

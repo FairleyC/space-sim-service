@@ -17,9 +17,12 @@ import (
 
 type HttpExposedSolarSystemService interface {
 	FindAllSolarSystems(ctx context.Context, pagination data.Pagination) ([]solarSystem.SolarSystem, error)
-	FindSolarSystem(ctx context.Context, id string) (solarSystem.SolarSystem, error)
+	FindSolarSystem(ctx context.Context, id string) (solarSystem.SolarSystemWithCommodityMarkets, error)
 	CreateSolarSystem(ctx context.Context, solarSystem solarSystem.SolarSystem) (solarSystem.SolarSystem, error)
 	RemoveSolarSystem(ctx context.Context, id string) error
+	CreateCommodityMarket(ctx context.Context, solarSystemId string, basePrice float64, demandQuantity int, commodityId string) (solarSystem.CommodityMarket, error)
+	UpdateCommodityMarket(ctx context.Context, commodityMarketId string, commodityMarketUpdate solarSystem.CommodityMarketUpdate) (solarSystem.CommodityMarket, error)
+	RemoveCommodityMarket(ctx context.Context, id string) error
 }
 
 type HttpExposedCommodityService interface {
@@ -69,6 +72,10 @@ func (h *Handler) mapRoutes() {
 	h.Router.HandleFunc(withPath(V1, "/solarSystems/{id}"), h.GetSolarSystem).Methods("GET")
 	h.Router.HandleFunc(withPath(V1, "/solarSystems"), h.PostSolarSystem).Methods("POST")
 	h.Router.HandleFunc(withPath(V1, "/solarSystems/{id}"), h.DeleteSolarSystem).Methods("DELETE")
+
+	h.Router.HandleFunc(withPath(V1, "/solarSystems/{solarSystemId}/commodityMarkets"), h.PostCommodityMarket).Methods("POST")
+	h.Router.HandleFunc(withPath(V1, "/solarSystems/{solarSystemId}/commodityMarkets/{commodityMarketId}"), h.PutCommodityMarket).Methods("PUT")
+	h.Router.HandleFunc(withPath(V1, "/solarSystems/{solarSystemId}/commodityMarkets/{commodityMarketId}"), h.DeleteCommodityMarket).Methods("DELETE")
 }
 
 func (h *Handler) Serve() error {

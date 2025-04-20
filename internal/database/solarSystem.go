@@ -22,7 +22,14 @@ func convertSolarSystemRowToSolarSystem(row SolarSystemRow) solarSystem.SolarSys
 	}
 }
 
-func (d *Database) GetSolarSystemById(ctx context.Context, id string) (solarSystem.SolarSystem, error) {
+func convertSolarSystemRowToSolarSystemWithCommodityMarkets(row SolarSystemRow, commodityMarkets []solarSystem.CommodityMarket) solarSystem.SolarSystemWithCommodityMarkets {
+	return solarSystem.SolarSystemWithCommodityMarkets{
+		ID:               row.ID,
+		Name:             row.Name.String,
+		CommodityMarkets: commodityMarkets,
+	}
+}
+func (d *Database) GetSolarSystemById(ctx context.Context, id string) (solarSystem.SolarSystemWithCommodityMarkets, error) {
 
 	var solarSystemRow SolarSystemRow
 	row := d.Pool.QueryRow(ctx, `
@@ -33,10 +40,14 @@ func (d *Database) GetSolarSystemById(ctx context.Context, id string) (solarSyst
 
 	err := row.Scan(&solarSystemRow.ID, &solarSystemRow.Name)
 	if err != nil {
-		return solarSystem.SolarSystem{}, solarSystem.ErrSolarSystemNotFound
+		return solarSystem.SolarSystemWithCommodityMarkets{}, solarSystem.ErrSolarSystemNotFound
+	}
+	commodityMarkets, err := d.GetCommodityMarketsBySolarSystemId(ctx, id)
+	if err != nil {
+		return solarSystem.SolarSystemWithCommodityMarkets{}, fmt.Errorf("error getting commodity markets: %w", err)
 	}
 
-	return convertSolarSystemRowToSolarSystem(solarSystemRow), nil
+	return convertSolarSystemRowToSolarSystemWithCommodityMarkets(solarSystemRow, commodityMarkets), nil
 }
 
 func (d *Database) GetSolarSystemsByPagination(ctx context.Context, pagination data.Pagination) ([]solarSystem.SolarSystem, error) {
@@ -105,11 +116,29 @@ func (d *Database) CreateSolarSystem(ctx context.Context, newSolarSystem solarSy
 }
 
 func (d *Database) RemoveSolarSystem(ctx context.Context, id string) error {
-	_, err := d.Pool.Exec(ctx, `
+	tx, err := d.Pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("error beginning transaction: %w", err)
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback(ctx)
+		} else {
+			tx.Commit(ctx)
+		}
+	}()
+
+	errRemovingCommodityMarkets := d.RemoveAllCommodityMarketsBySolarSystemId(ctx, id)
+	if errRemovingCommodityMarkets != nil {
+		return fmt.Errorf("error removing commodity markets: %w", errRemovingCommodityMarkets)
+	}
+
+	_, errDeleteSolarSystem := d.Pool.Exec(ctx, `
 		DELETE FROM solar_systems
 		WHERE id = $1
 	`, id)
-	if err != nil {
+	if errDeleteSolarSystem != nil {
 		return fmt.Errorf("error deleting solar system: %w", err)
 	}
 
