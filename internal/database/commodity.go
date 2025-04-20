@@ -46,11 +46,24 @@ func (d *Database) GetCommodityById(ctx context.Context, id string) (commodity.C
 func (d *Database) GetCommoditiesByPagination(ctx context.Context, pagination data.Pagination) ([]commodity.Commodity, error) {
 	offset := pagination.GetOffset()
 	limit := pagination.GetLimit()
-	orderBy := pagination.GetOrderByField([]string{"unitmass", "unitvolume", "name"}, "createdat")
+	orderBy := pagination.GetOrderByField([]data.AllowedField{
+		{
+			FieldName:          "unitmass",
+			FormattedFieldName: "unit_mass",
+		},
+		{
+			FieldName:          "unitvolume",
+			FormattedFieldName: "unit_volume",
+		},
+		{
+			FieldName:          "name",
+			FormattedFieldName: "name",
+		},
+	}, "created_at")
 	direction := pagination.GetOrderByDirection()
 
 	rows, err := d.Pool.Query(ctx, `
-		SELECT id, name, unitmass, unitvolume
+		SELECT id, name, unit_mass, unit_volume
 		FROM commodities
 		ORDER BY `+orderBy+` `+direction+`
 		LIMIT $1
@@ -96,9 +109,9 @@ func (d *Database) CreateCommodity(ctx context.Context, newCommodity commodity.C
 	}
 
 	rows, err := d.Pool.Query(ctx, `
-		INSERT INTO commodities (id, name, unitmass, unitvolume)
+		INSERT INTO commodities (id, name, unit_mass, unit_volume)
 		VALUES ($1, $2, $3, $4)
-		RETURNING id, name, unitmass, unitvolume
+		RETURNING id, name, unit_mass, unit_volume
 	`, newRow.ID, newRow.Name, newRow.UnitMass, newRow.UnitVolume)
 
 	if err != nil {

@@ -53,7 +53,12 @@ func (d *Database) GetSolarSystemById(ctx context.Context, id string) (solarSyst
 func (d *Database) GetSolarSystemsByPagination(ctx context.Context, pagination data.Pagination) ([]solarSystem.SolarSystem, error) {
 	offset := pagination.GetOffset()
 	limit := pagination.GetLimit()
-	orderBy := pagination.GetOrderByField([]string{"name"}, "createdat")
+	orderBy := pagination.GetOrderByField([]data.AllowedField{
+		{
+			FieldName:          "name",
+			FormattedFieldName: "name",
+		},
+	}, "createdat")
 	direction := pagination.GetOrderByDirection()
 
 	rows, err := d.Pool.Query(ctx, `

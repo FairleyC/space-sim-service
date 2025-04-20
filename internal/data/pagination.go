@@ -2,7 +2,6 @@ package data
 
 import (
 	"net/http"
-	"slices"
 	"strconv"
 	"strings"
 )
@@ -17,6 +16,11 @@ type Pagination struct {
 	Page    int
 	PerPage int
 	OrderBy string
+}
+
+type AllowedField struct {
+	FieldName          string
+	FormattedFieldName string
 }
 
 func GetPagination(r *http.Request) Pagination {
@@ -55,18 +59,20 @@ func (p *Pagination) GetLimit() int {
 	return p.PerPage
 }
 
-func (p *Pagination) GetOrderByField(allowedOrderBy []string, defaultOrderBy string) string {
+func (p *Pagination) GetOrderByField(allowedOrderBy []AllowedField, defaultOrderBy string) string {
 	parsedOrderBy := p.OrderBy
 
 	if strings.Contains(parsedOrderBy, ",") {
 		parsedOrderBy = strings.Split(parsedOrderBy, ",")[0]
 	}
 
-	if !slices.Contains(allowedOrderBy, strings.ToLower(parsedOrderBy)) {
-		return defaultOrderBy
+	for _, allowedField := range allowedOrderBy {
+		if allowedField.FieldName == strings.ToLower(parsedOrderBy) {
+			return allowedField.FormattedFieldName
+		}
 	}
 
-	return strings.ToLower(parsedOrderBy)
+	return defaultOrderBy
 }
 
 func (p *Pagination) GetOrderByDirection() string {
