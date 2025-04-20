@@ -10,3 +10,9 @@ func (s *Service) GetCommodity() (ctx context.Context, id string) (Commodity, er
     ...
 }
 ```
+
+#### Owner-Player-Organization Polymorphism 
+[stack overflow article](https://stackoverflow.com/questions/28222533/polymorphism-for-foreign-key-constraints)
+
+For when I need to implement this model.
+
